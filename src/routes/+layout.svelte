@@ -2,6 +2,8 @@
 	let { children } = $props();
 </script>
 
-<svelte:head></svelte:head>
+<svelte:head>
+	<title>YGOSTATS</title>
+</svelte:head>
 
 {@render children()}

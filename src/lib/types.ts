@@ -7,6 +7,8 @@ export interface RecordRow {
 }
 
 export interface DashBoardLoadData {
+	startDate: string;
+	endDate: string;
 	winLoseStats: {
 		total: number;
 		totalWinRate: number;

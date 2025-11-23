@@ -1,6 +1,6 @@
 import Database, { type Database as DBType } from 'better-sqlite3';
 
-const DB_PATH = 'data/records.db';
+const DB_PATH = 'records.db';
 
 let db: DBType;
 
