@@ -1,33 +1,12 @@
 <script lang="ts">
 	import type { DashBoardLoadData } from '$lib/types';
+	import { formatRate, resetDatesToToday } from '$lib/utils';
 	import type { ActionData, PageData } from './$types';
 	import { onMount } from 'svelte';
 
 	let { data, form }: { data: PageData; form?: ActionData } = $props();
 	let { winLoseStats, counts, startDate, endDate } = data as DashBoardLoadData;
 
-	function formatRate(rate: number): string {
-		if (typeof rate !== 'number' || isNaN(rate)) return 'N/A';
-		return `${rate.toFixed(1)}%`;
-	}
-
-	function resetDatesToToday() {
-		const today = new Date();
-		const year = today.getFullYear();
-		const month = String(today.getMonth() + 1).padStart(2, '0');
-		const day = String(today.getDate()).padStart(2, '0');
-		const todayStr = `${year}-${month}-${day}`;
-
-		const filterForm = document.getElementById('date-filter-form') as HTMLFormElement;
-		const startDateInput = document.querySelector('input[name="start_date"]') as HTMLInputElement;
-		const endDateInput = document.querySelector('input[name="end_date"]') as HTMLInputElement;
-
-		if (startDateInput && endDateInput && filterForm) {
-			startDateInput.value = todayStr;
-			endDateInput.value = todayStr;
-			filterForm.submit();
-		}
-	}
 	onMount(() => {
 		const filterForm = document.getElementById('date-filter-form') as HTMLFormElement;
 		const startDateInput = document.querySelector('input[name="start_date"]') as HTMLInputElement;
@@ -61,11 +40,11 @@
 			<fieldset>
 				<legend>硬幣結果</legend>
 				<label>
-					<input type="radio" name="coin_flip" value="Head" required />
+					<input type="radio" name="coin_flip" value="head" required />
 					正面
 				</label>
 				<label>
-					<input type="radio" name="coin_flip" value="Tail" required />
+					<input type="radio" name="coin_flip" value="tail" required />
 					反面
 				</label>
 			</fieldset>

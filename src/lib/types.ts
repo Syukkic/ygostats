@@ -1,11 +1,3 @@
-export interface RecordRow {
-	id: number;
-	coin_flip: 'Head' | 'Tail';
-	match_result: 'Win' | 'Lost';
-	is_first: 1 | 0;
-	created_at: string;
-}
-
 export interface DashBoardLoadData {
 	startDate: string;
 	endDate: string;
