@@ -1,6 +1,10 @@
 import Database, { type Database as DBType } from 'better-sqlite3';
 
-const DB_PATH = 'records.db';
+const IS_DEV_MODE = process.env.NODE_ENV !== 'production';
+const DB_PATH = IS_DEV_MODE ? 'dev.db' : 'records.db';
+
+console.log(process.env.NODE_ENV);
+console.log(`Database Path: ${DB_PATH}`);
 
 let db: DBType;
 

@@ -58,8 +58,11 @@ export const actions: Actions = {
 			return fail(400, { error: 'Invalid form data' });
 		}
 
-		const firstMap = { Yes: 1, No: 0 } as const;
-		const is_first = firstMap[is_first_str as keyof typeof firstMap];
+		const is_first = Number(is_first_str);
+
+		if (isNaN(is_first) || (is_first !== 0 && is_first !== 1)) {
+			return fail(400, { error: 'Invalid value for is_first' });
+		}
 
 		try {
 			createRecord({ coin_flip, match_result, is_first });

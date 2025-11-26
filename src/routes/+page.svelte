@@ -52,11 +52,11 @@
 			<fieldset>
 				<legend>是否先手</legend>
 				<label>
-					<input type="radio" name="is_first" value="Yes" required />
+					<input type="radio" name="is_first" value="1" required />
 					先手
 				</label>
 				<label>
-					<input type="radio" name="is_first" value="No" required />
+					<input type="radio" name="is_first" value="0" required />
 					後手
 				</label>
 			</fieldset>

@@ -51,11 +51,7 @@ export function getWinLoseStats(startDate: string, endDate: string) {
 	);
 }
 
-export function createRecord(data: {
-	coin_flip: string;
-	match_result: string;
-	is_first: number;
-}) {
+export function createRecord(data: { coin_flip: string; match_result: string; is_first: number }) {
 	database
 		.prepare(
 			`INSERT INTO records (coin_flip, match_result, is_first)
