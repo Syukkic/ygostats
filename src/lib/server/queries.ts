@@ -1,7 +1,5 @@
 import { database } from '$lib/server/db';
 
-const WHERE_CLAUSE = `WHERE DATE(created_at) BETWEEN ? AND ?`;
-
 export function getCoinStats(startDate: string, endDate: string) {
 	const result = database
 		.prepare(
@@ -9,7 +7,8 @@ export function getCoinStats(startDate: string, endDate: string) {
                 SUM(CASE WHEN coin_flip = 'head' THEN 1 ELSE 0 END) as heads,
                 SUM(CASE WHEN coin_flip = 'tail' THEN 1 ELSE 0 END) as tails,
                 COUNT(coin_flip) as total_matches
-            FROM records ${WHERE_CLAUSE};`
+            FROM records
+			WHERE DATE(created_at) BETWEEN ? AND ?;`
 		)
 		.get(startDate, endDate) as { heads: number; tails: number; total_matches: number } | undefined;
 
@@ -26,7 +25,8 @@ export function getWinLoseStats(startDate: string, endDate: string) {
               SUM(CASE WHEN match_result = 'win' AND is_first = 1 THEN 1 ELSE 0 END) as firstWins,
               SUM(CASE WHEN match_result = 'win' AND is_first = 0 THEN 1 ELSE 0 END) as secondWins,
               COUNT(match_result) as totalMatches
-             FROM records ${WHERE_CLAUSE};`
+            FROM records
+			WHERE DATE(created_at) BETWEEN ? AND ?;`
 		)
 		.get(startDate, endDate) as
 		| {
