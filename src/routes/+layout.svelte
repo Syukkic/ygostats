@@ -1,11 +1,16 @@
 <script lang="ts">
-	import favicon from '$lib/assets/favicon.svg';
-	let { children } = $props();
+  import favicon from '$lib/assets/favicon.svg';
+  import Navigation from '$lib/components/Navigation.svelte';
+  import '../app.css';
+  let { children } = $props();
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
-	<title>YGO Tool</title>
+  <link rel="icon" href={favicon} />
+  <title>YGO Tool</title>
 </svelte:head>
 
-{@render children()}
+<Navigation />
+<main class="app-container">
+  {@render children()}
+</main>

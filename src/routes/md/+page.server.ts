@@ -1,5 +1,5 @@
 import { fail, type Actions } from '@sveltejs/kit';
-import { getCoinStats, getWinLoseStats, createRecord } from '$lib/server/queries';
+import { getCoinStats, getMDWinLoseStats, createMDRecord } from '$lib/server/queries';
 import { getTodayStr } from '$lib/utils';
 import type { PageServerLoad } from './$types';
 
@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ url }) => {
   }
 
   const coinStats = getCoinStats(startDate, endDate);
-  const winLoseStats = getWinLoseStats(startDate, endDate);
+  const winLoseStats = getMDWinLoseStats(startDate, endDate);
 
   const totalWinRate =
     coinStats.total_matches > 0 ? (winLoseStats.totalWins / coinStats.total_matches) * 100.0 : 0;
@@ -66,7 +66,7 @@ export const actions: Actions = {
     }
 
     try {
-      createRecord({ coin_flip, duel_result, go_first });
+      createMDRecord({ coin_flip, duel_result, go_first });
       return { success: true };
     } catch (error) {
       console.error('DB Error:', error);

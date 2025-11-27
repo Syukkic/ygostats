@@ -4,7 +4,6 @@ const IS_DEV_MODE = process.env.NODE_ENV !== 'production';
 const DB_PATH = IS_DEV_MODE ? 'dev.db' : 'records.db';
 
 console.log(process.env.NODE_ENV);
-console.log(`Database Path: ${DB_PATH}`);
 
 let db: DBType;
 
@@ -23,7 +22,7 @@ function openDB() {
 
         CREATE TABLE IF NOT EXISTS bo3_matches (
            match_id INTEGER PRIMARY KEY AUTOINCREMENT,
-           vs_desk TEXT,
+           vs_desk TEXT NOT NULL,
            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -35,7 +34,7 @@ function openDB() {
            go_first INTEGER NOT NULL CHECK (go_first IN (0, 1)), -- 1 (going first) or 0 (going second)
 
            UNIQUE(match_id, game_number), 
-           FOREIGN KEY (match_id) REFERENCES bo3_matches(match_id)
+           FOREIGN KEY (match_id) REFERENCES bo3_matches(match_id) ON DELETE CASCADE
          );
     `;
   db.exec(initSql);

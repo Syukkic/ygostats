@@ -5,7 +5,7 @@
 
 <svelte:head>
   <link rel="icon" href={favicon} />
-  <title>MD</title>
+  <title>BO3</title>
 </svelte:head>
 
 {@render children()}
