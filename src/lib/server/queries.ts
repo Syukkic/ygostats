@@ -54,8 +54,8 @@ export function getMDWinLoseStats(startDate: string, endDate: string) {
 export function createMDRecord(data: { coin_flip: string; duel_result: string; go_first: number }) {
   database
     .prepare(
-      `INSERT INTO md (coin_flip, duel_result, go_first)
-			 VALUES (@coin_flip, @duel_result, @go_first)`
+      `INSERT INTO md (coin_flip, duel_result, go_first, created_at)
+			 VALUES (@coin_flip, @duel_result, @go_first, DATETIME('now', '+8 hours'))`
     )
     .run(data);
 }
@@ -71,8 +71,8 @@ export const createBO3Record = database.transaction(
   }) => {
     console.log(data);
     const matchStmt = database.prepare(`
-        INSERT INTO bo3_matches (vs_desk)
-        VALUES (@vs_desk)
+        INSERT INTO bo3_matches (vs_desk, created_at)
+        VALUES (@vs_desk, DATETIME('now', '+8 hours'))
     `);
     const result = matchStmt.run({ vs_desk: data.vs_desk });
 
@@ -127,4 +127,19 @@ export function getBO3WinLoseStats(startDate: string, endDate: string) {
     | undefined;
 
   return result;
+}
+
+export function createDCRecord(data: {
+  coin_flip: string;
+  duel_result: string;
+  go_first: number;
+  vs_desk: string | null;
+  points: number;
+}) {
+  database
+    .prepare(
+      `INSERT INTO dc (coin_flip, duel_result, go_first, vs_desk, points, created_at)
+			 VALUES (@coin_flip, @duel_result, @go_first, @vs_desk, @points, DATETIME('now', '+8 hours'))`
+    )
+    .run(data);
 }

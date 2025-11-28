@@ -102,11 +102,11 @@
       <h2>篩選日期</h2>
       <form method="GET" data-sveltekit-reload id="date-filter-form" class="date-filter-form">
         <label>
-          開始日期:
+          開始日期
           <input type="date" name="start_date" value={startDate} />
         </label>
         <label>
-          結束日期:
+          結束日期
           <input type="date" name="end_date" value={endDate} />
         </label>
         <div class="form-actions">
@@ -116,7 +116,7 @@
       </form>
 
       <h2 style="margin-top: var(--section-gap);">
-        勝率與場次統計 ({startDate === endDate ? startDate : `${startDate} ~ ${endDate}`})
+        場次勝率 ({startDate === endDate ? startDate : `${startDate} ~ ${endDate}`})
       </h2>
       <table>
         <caption class="visually-hidden">MD 總體勝率、先手勝率、後手勝率的詳細數據</caption>
@@ -151,7 +151,7 @@
       </table>
 
       <h2 style="margin-top: var(--section-gap);">
-        硬幣投擲計數 ({startDate === endDate ? startDate : `${startDate} ~ ${endDate}`})
+        硬幣正反({startDate === endDate ? startDate : `${startDate} ~ ${endDate}`})
       </h2>
       <table>
         <caption class="visually-hidden">硬幣投擲結果的正反面次數統計</caption>
@@ -196,27 +196,25 @@
     margin-bottom: 1rem;
   }
   .form-grid {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: auto 1fr;
     gap: 1rem;
+    align-items: center;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
   }
   .form-group {
-    border: none;
-    padding: 0;
-    margin: 0;
+    display: contents;
   }
   .form-item-row {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    display: contents;
   }
   .form-label {
     font-weight: 500;
     color: var(--text-color-secondary);
-    flex-shrink: 0; /* Prevent label from shrinking */
+    justify-self: start;
   }
   .radio-group {
     display: flex;

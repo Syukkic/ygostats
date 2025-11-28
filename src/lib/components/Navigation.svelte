@@ -25,6 +25,13 @@
           aria-current={page.url.pathname.startsWith('/bo3') ? 'page' : undefined}>BO3</a
         >
       </li>
+      <li>
+        <a
+          href={resolve('/dc')}
+          class:active={page.url.pathname.startsWith('/dc')}
+          aria-current={page.url.pathname.startsWith('/dc') ? 'page' : undefined}>DC</a
+        >
+      </li>
     </ul>
   </nav>
 </header>

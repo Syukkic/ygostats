@@ -86,6 +86,7 @@ input[type='checkbox'] {
 }
 
 input[type='text'],
+input[type='number'],
 input[type='date'],
 select {
   background-color: var(--surface-color);

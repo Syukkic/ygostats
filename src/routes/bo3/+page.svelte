@@ -133,21 +133,19 @@
               <option value="lose">失敗</option>
             </select>
           </div>
+          <div class="game-row optional">
+            <h4>對手卡組</h4>
+            <input
+              type="text"
+              id="vs_desk"
+              name="vs_desk"
+              maxlength="20"
+              placeholder="例如：壹世壞"
+              required
+              bind:value={vsDesk}
+            />
+          </div>
         </div>
-
-        <label for="vs_desk">
-          對手卡組
-
-          <input
-            type="text"
-            id="vs_desk"
-            name="vs_desk"
-            maxlength="20"
-            placeholder="例如：壹世壞"
-            required
-            bind:value={vsDesk}
-          />
-        </label>
       </fieldset>
 
       <button type="submit" disabled={!canSubmit || isSubmitting}>
@@ -172,13 +170,12 @@
 
       <form method="GET" data-sveltekit-reload id="date-filter-form" class="date-filter-form">
         <label>
-          開始日期:
-
+          開始日期
           <input type="date" name="start_date" value={startDate} />
         </label>
 
         <label>
-          結束日期:
+          結束日期
 
           <input type="date" name="end_date" value={endDate} />
         </label>
@@ -313,6 +310,11 @@
     margin: 0;
     text-align: left;
   }
+
+  .game-row input[type='text'] {
+    grid-column: 2 / span 2;
+  }
+
   .match-win {
     background-color: var(--win-bg-color);
   }

@@ -20,6 +20,16 @@ function openDB() {
            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
         );
 
+        CREATE TABLE IF NOT EXISTS dc (
+           id INTEGER PRIMARY KEY AUTOINCREMENT,
+           coin_flip TEXT NOT NULL CHECK (coin_flip IN ('head', 'tail')),
+           duel_result TEXT NOT NULL CHECK (duel_result IN ('win', 'lose')),
+           go_first INTEGER NOT NULL CHECK (go_first IN (0, 1)),     -- 1 (going first) or 0 (going second)
+           vs_desk TEXT,
+           points INTEGER,
+           created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+
         CREATE TABLE IF NOT EXISTS bo3_matches (
            match_id INTEGER PRIMARY KEY AUTOINCREMENT,
            vs_desk TEXT NOT NULL,
