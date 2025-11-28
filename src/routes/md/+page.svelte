@@ -188,6 +188,12 @@
     gap: 1rem;
     align-items: end;
   }
+  .date-filter-form label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
   .form-actions {
     display: flex;
     gap: 1rem;
@@ -219,6 +225,6 @@
   .radio-group {
     display: flex;
     gap: 1.5rem;
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    flex-wrap: wrap;
   }
 </style>

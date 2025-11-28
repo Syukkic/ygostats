@@ -275,6 +275,12 @@
     gap: 1rem;
     align-items: end;
   }
+  .date-filter-form label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+  }
   .form-actions {
     display: flex;
     gap: 1rem;
