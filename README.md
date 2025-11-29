@@ -1,7 +1,21 @@
-If you encounter `better-sqlite3` binding issues after running `pnpm add better-sqlite3@latest`, you'll need to run the following command to fix it:
+## 安裝
+
+```bash
+pnpm install
+```
+
+如果遇到`better-sqlite3`問題，嘗試執行以下命令來修復它：
 
 ```bash
 npx node-gyp rebuild --directory=node_modules/better-sqlite3
 ```
 
-![截圖](./assets/demo.png)
+## 運行
+
+```bash
+NODE_ENV=production node build/index.js
+```
+
+## 截圖
+
+![screenshot](./assets/demo.png)
