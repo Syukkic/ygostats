@@ -1,6 +1,6 @@
 import { fail, type Actions } from '@sveltejs/kit';
 import { getCoinStats, getMDWinLoseStats, createMDRecord } from '$lib/server/queries';
-import { getTodayStr } from '$lib/utils';
+import { getTodayStr, isCoinFlip, isDuelResult } from '$lib/utils';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ url }) => {
@@ -57,6 +57,18 @@ export const actions: Actions = {
       typeof go_first_str !== 'string'
     ) {
       return fail(400, { error: 'Invalid form data' });
+    }
+
+    if (!isCoinFlip(coin_flip)) {
+      return fail(400, {
+        error: `Invalid value for coin_flip: ${coin_flip}. Expected 'head' or 'tail'.`
+      });
+    }
+
+    if (!isDuelResult(duel_result)) {
+      return fail(400, {
+        error: `Invalid value for duel_result: ${duel_result}. Expected 'win' or 'lose'.`
+      });
     }
 
     const go_first = Number(go_first_str);

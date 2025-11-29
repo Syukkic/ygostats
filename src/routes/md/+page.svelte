@@ -1,36 +1,42 @@
 <script lang="ts">
   import { formatRate, resetDatesToToday } from '$lib/utils';
-  import { onMount } from 'svelte';
+  import { enhance } from '$app/forms';
   import type { PageData, ActionData } from './$types';
-  import type { MDDashboardLoadData } from '$lib/types';
 
   let { data, form }: { data: PageData; form?: ActionData } = $props();
-  let { winLoseStats, counts, startDate, endDate } = data as MDDashboardLoadData;
 
   let isSubmitting = $state(false);
+  let successMessage = $state<string | null>(null);
 
-  onMount(() => {
-    const filterForm = document.getElementById('date-filter-form') as HTMLFormElement;
-    const startDateInput = document.querySelector('input[name="start_date"]') as HTMLInputElement;
-    const endDateInput = document.querySelector('input[name="end_date"]') as HTMLInputElement;
-
-    if (filterForm && startDateInput && endDateInput) {
-      filterForm.addEventListener('submit', (event) => {
-        const start = new Date(startDateInput.value);
-        const end = new Date(endDateInput.value);
-
-        if (start > end) {
-          event.preventDefault(); // Prevent form submission
-          alert('結束日期不能比開始日期早！');
-        }
-      });
-    }
-  });
+  function resetForm(formElement: HTMLFormElement) {
+    formElement.reset();
+    const radioButtons = formElement.querySelectorAll<HTMLInputElement>('input[type="radio"]');
+    radioButtons.forEach((radio) => (radio.checked = false));
+    successMessage = '紀錄已成功保存！';
+    setTimeout(() => (successMessage = null), 3000);
+  }
 </script>
 
 <div class="dashboard-grid">
   <section class="left">
-    <form method="post" action="?/createRecord" class="card">
+    <form
+      method="post"
+      action="?/createRecord"
+      class="card add-record-form"
+      use:enhance={() => {
+        isSubmitting = true;
+        successMessage = null;
+        return async ({ result, update }) => {
+          if (result.type === 'success') {
+            resetForm(document.querySelector('.add-record-form') as HTMLFormElement);
+            await update();
+          } else if (result.type === 'error') {
+            console.error('Form submission error:', result.error);
+          }
+          isSubmitting = false;
+        };
+      }}
+    >
       <h2>新增紀錄</h2>
       <div class="form-grid">
         <fieldset class="form-group">
@@ -90,8 +96,10 @@
       </button>
 
       <div aria-live="polite" aria-atomic="true">
-        {#if form?.success}
-          <p class="text-success">紀錄已成功保存！</p>
+        {#if form?.error}
+          <p class="text-error">錯誤：{form.error}</p>
+        {:else if successMessage}
+          <p class="text-success">{successMessage}</p>
         {/if}
       </div>
     </form>
@@ -103,11 +111,11 @@
       <form method="GET" data-sveltekit-reload id="date-filter-form" class="date-filter-form">
         <label>
           開始日期
-          <input type="date" name="start_date" value={startDate} />
+          <input type="date" name="start_date" value={data.startDate} />
         </label>
         <label>
           結束日期
-          <input type="date" name="end_date" value={endDate} />
+          <input type="date" name="end_date" value={data.endDate} />
         </label>
         <div class="form-actions">
           <button type="submit">篩選</button>
@@ -115,63 +123,69 @@
         </div>
       </form>
 
-      <h2 style="margin-top: var(--section-gap);">
-        場次勝率 ({startDate === endDate ? startDate : `${startDate} ~ ${endDate}`})
-      </h2>
-      <table>
-        <caption class="visually-hidden">MD 總體勝率、先手勝率、後手勝率的詳細數據</caption>
-        <thead>
-          <tr>
-            <th>項目</th>
-            <th>總場次</th>
-            <th>總勝場</th>
-            <th>勝率</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>總計</td>
-            <td>{counts.total}</td>
-            <td>{winLoseStats.total}</td>
-            <td>{formatRate(winLoseStats.totalWinRate)}</td>
-          </tr>
-          <tr>
-            <td>先手</td>
-            <td>{winLoseStats.firstCount}</td>
-            <td>{winLoseStats.firstWins}</td>
-            <td>{formatRate(winLoseStats.firstWinRate)}</td>
-          </tr>
-          <tr>
-            <td>後手</td>
-            <td>{winLoseStats.secondCount}</td>
-            <td>{winLoseStats.secondWins}</td>
-            <td>{formatRate(winLoseStats.secondWinRate)}</td>
-          </tr>
-        </tbody>
-      </table>
+      {#if data.winLoseStats && data.counts}
+        <h2 style="margin-top: var(--section-gap);">
+          場次勝率 ({data.startDate === data.endDate
+            ? data.startDate
+            : `${data.startDate} ~ ${data.endDate}`})
+        </h2>
+        <table>
+          <caption class="visually-hidden">MD 總體勝率、先手勝率、後手勝率的詳細數據</caption>
+          <thead>
+            <tr>
+              <th>項目</th>
+              <th>總場次</th>
+              <th>總勝場</th>
+              <th>勝率</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>總計</td>
+              <td>{data.counts.total}</td>
+              <td>{data.winLoseStats.total}</td>
+              <td>{formatRate(data.winLoseStats.totalWinRate)}</td>
+            </tr>
+            <tr>
+              <td>先手</td>
+              <td>{data.winLoseStats.firstCount}</td>
+              <td>{data.winLoseStats.firstWins}</td>
+              <td>{formatRate(data.winLoseStats.firstWinRate)}</td>
+            </tr>
+            <tr>
+              <td>後手</td>
+              <td>{data.winLoseStats.secondCount}</td>
+              <td>{data.winLoseStats.secondWins}</td>
+              <td>{formatRate(data.winLoseStats.secondWinRate)}</td>
+            </tr>
+          </tbody>
+        </table>
 
-      <h2 style="margin-top: var(--section-gap);">
-        硬幣正反({startDate === endDate ? startDate : `${startDate} ~ ${endDate}`})
-      </h2>
-      <table>
-        <caption class="visually-hidden">硬幣投擲結果的正反面次數統計</caption>
-        <thead>
-          <tr>
-            <th>結果</th>
-            <th>次數</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>正面</td>
-            <td>{counts.heads}</td>
-          </tr>
-          <tr>
-            <td>反面</td>
-            <td>{counts.tails}</td>
-          </tr>
-        </tbody>
-      </table>
+        <h2 style="margin-top: var(--section-gap);">
+          硬幣正反({data.startDate === data.endDate
+            ? data.startDate
+            : `${data.startDate} ~ ${data.endDate}`})
+        </h2>
+        <table>
+          <caption class="visually-hidden">硬幣投擲結果的正反面次數統計</caption>
+          <thead>
+            <tr>
+              <th>結果</th>
+              <th>次數</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>正面</td>
+              <td>{data.counts.heads}</td>
+            </tr>
+            <tr>
+              <td>反面</td>
+              <td>{data.counts.tails}</td>
+            </tr>
+          </tbody>
+        </table>
+      {/if}
     </div>
   </section>
 </div>

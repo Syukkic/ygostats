@@ -1,7 +1,8 @@
 import { createBO3Record, getBO3WinLoseStats } from '$lib/server/queries';
 import { fail, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { getTodayStr } from '$lib/utils';
+import { getTodayStr, isDuelResult } from '$lib/utils';
+import type { BO3Duel } from '$lib/types';
 
 export const load: PageServerLoad = async ({ url }) => {
   const today = getTodayStr();
@@ -27,34 +28,31 @@ export const actions: Actions = {
 
     for (let i = 1; i <= 3; i++) {
       const go_first_str = data.get(`go_first_${i}`) as string | null;
-      const duel_result = data.get(`duel_result_${i}`) as string | null;
+      const duel_result_str = data.get(`duel_result_${i}`) as string | null;
 
-      if (go_first_str && duel_result) {
+      if (go_first_str && duel_result_str) {
         const go_first = Number(go_first_str);
+        if (!isDuelResult(duel_result_str)) {
+          return fail(400, { error: `Invalid result for game ${i}` });
+        }
 
-        if (duel_result === 'win') winCount++;
-        if (duel_result === 'lose') loseCount++;
+        if (duel_result_str === 'win') winCount++;
+        if (duel_result_str === 'lose') loseCount++;
 
-        duels.push({ game_number: i, go_first: go_first, duel_result: duel_result });
+        duels.push({ game_number: i, go_first: go_first, duel_result: duel_result_str } as BO3Duel);
 
         if (winCount === 2 || loseCount === 2) break;
       }
     }
 
     if (duels.length < 2 || (winCount !== 2 && loseCount !== 2)) {
-      return fail(400, { error: 'Bo3 記錄不完整或邏輯錯誤。' });
+      return fail(400, { error: 'Bo3記錄不完整或邏輯錯誤。' });
     }
-
-    console.log(duels);
 
     try {
       const match_id = createBO3Record({
         vs_desk: vs_desk,
-        duels: duels.map((d) => ({
-          game_number: d.game_number,
-          duel_result: d.duel_result,
-          go_first: d.go_first
-        }))
+        duels: duels as BO3Duel[]
       });
       return { success: true, match_id: match_id };
     } catch (error) {

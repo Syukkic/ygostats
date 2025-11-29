@@ -1,3 +1,5 @@
+import type { CoinFlip, DuelResult, GoFirst } from './types';
+
 export function getTodayStr() {
   const today = new Date();
   const year = today.getFullYear();
@@ -31,4 +33,16 @@ export function formatDuelResult(result: 'win' | 'lose' | null) {
   if (result === 'win') return 'O';
   if (result === 'lose') return 'X';
   return '';
+}
+
+export function isCoinFlip(value: string): value is CoinFlip {
+  return value === 'head' || value === 'tail';
+}
+
+export function isDuelResult(value: string): value is DuelResult {
+  return value === 'win' || value === 'lose';
+}
+
+export function isGoFirst(value: number): value is GoFirst {
+  return value === 0 || value === 1;
 }

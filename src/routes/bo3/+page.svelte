@@ -1,17 +1,16 @@
 <script lang="ts">
   import { formatDuelResult, resetDatesToToday } from '$lib/utils';
   import type { PageData, ActionData } from './$types';
-  import { onMount } from 'svelte';
+  import { enhance } from '$app/forms';
 
   let { data, form }: { data: PageData; form?: ActionData } = $props();
-  let { matcHistory, startDate, endDate } = data;
 
   let g1Result = $state<'win' | 'lose' | ''>('');
   let g2Result = $state<'win' | 'lose' | ''>('');
   let g3Result = $state<'win' | 'lose' | ''>('');
   let g3First = $state<'1' | '0' | ''>('');
   let vsDesk = $state<string>('');
-  let showSuccess = $state(false);
+  let successMessage = $state<string | null>(null);
   let isSubmitting = $state(false);
 
   const score = $derived({
@@ -26,28 +25,38 @@
     !!vsDesk && isCompleteG1G2 && (score.win === 2 || score.lose === 2 || (needG3 && isG3Filled))
   );
 
-  onMount(() => {
-    const filterForm = document.getElementById('date-filter-form') as HTMLFormElement;
-    const startDateInput = document.querySelector('input[name="start_date"]') as HTMLInputElement;
-    const endDateInput = document.querySelector('input[name="end_date"]') as HTMLInputElement;
-
-    if (filterForm && startDateInput && endDateInput) {
-      filterForm.addEventListener('submit', (event) => {
-        const start = new Date(startDateInput.value);
-        const end = new Date(endDateInput.value);
-
-        if (start > end) {
-          event.preventDefault();
-          alert('結束日期不能比開始日期早！');
-        }
-      });
-    }
-  });
+  function resetForm(formElement: HTMLFormElement) {
+    formElement.reset();
+    g1Result = '';
+    g2Result = '';
+    g3Result = '';
+    g3First = '';
+    vsDesk = '';
+    successMessage = '紀錄已成功保存！';
+    setTimeout(() => (successMessage = null), 3000);
+  }
 </script>
 
 <div class="dashboard-grid">
   <section class="left">
-    <form method="post" action="?/createRecord" class="card add-record-form">
+    <form
+      method="post"
+      action="?/createRecord"
+      class="card add-record-form"
+      use:enhance={() => {
+        isSubmitting = true;
+        successMessage = null;
+        return async ({ result, update }) => {
+          if (result.type === 'success') {
+            resetForm(document.querySelector('.add-record-form') as HTMLFormElement);
+            await update();
+          } else if (result.type === 'error') {
+            console.error('Form submission error:', result.error);
+          }
+          isSubmitting = false;
+        };
+      }}
+    >
       <h2>新增紀錄</h2>
 
       <fieldset>
@@ -157,8 +166,8 @@
           <p class="text-error">錯誤：{form.error}</p>
         {:else if needG3 && (!g3Result || !g3First)}
           <p class="text-warning">比數 1:1，請填寫 G3 結果。</p>
-        {:else if showSuccess}
-          <p class="text-success">紀錄已成功保存！</p>
+        {:else if successMessage}
+          <p class="text-success">{successMessage}</p>
         {/if}
       </div>
     </form>
@@ -171,13 +180,13 @@
       <form method="GET" data-sveltekit-reload id="date-filter-form" class="date-filter-form">
         <label>
           開始日期
-          <input type="date" name="start_date" value={startDate} />
+          <input type="date" name="start_date" value={data.startDate} />
         </label>
 
         <label>
           結束日期
 
-          <input type="date" name="end_date" value={endDate} />
+          <input type="date" name="end_date" value={data.endDate} />
         </label>
 
         <div class="form-actions">
@@ -187,7 +196,7 @@
         </div>
       </form>
 
-      {#if matcHistory && matcHistory.length > 0}
+      {#if data.matcHistory && data.matcHistory.length > 0}
         <div class="table-wrapper">
           <table>
             <caption class="visually-hidden"
@@ -211,7 +220,7 @@
             </thead>
 
             <tbody>
-              {#each matcHistory as match (match.match_id)}
+              {#each data.matcHistory as match (match.match_id)}
                 {@const matchWin =
                   (match.game1 === 'win' ? 1 : 0) +
                   (match.game2 === 'win' ? 1 : 0) +
