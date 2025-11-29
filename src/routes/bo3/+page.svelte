@@ -177,7 +177,7 @@
     <div class="card">
       <h2>對局記錄</h2>
 
-      <form method="GET" data-sveltekit-reload id="date-filter-form" class="date-filter-form">
+      <form method="GET" id="date-filter-form" class="date-filter-form">
         <label>
           開始日期
           <input type="date" name="start_date" value={data.startDate} />
