@@ -162,7 +162,7 @@
         </table>
 
         <h2 style="margin-top: var(--section-gap);">
-          硬幣正反({data.startDate === data.endDate
+          硬幣正反 ({data.startDate === data.endDate
             ? data.startDate
             : `${data.startDate} ~ ${data.endDate}`})
         </h2>
