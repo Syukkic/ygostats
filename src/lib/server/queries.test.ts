@@ -399,12 +399,12 @@ describe('queries.ts', () => {
       });
     });
 
-    it('should insert a new DC record with null vs_desk', () => {
+    it("should insert a new DC record with '未知卡組' as vs_desk when null is provided", () => {
       const recordData: DCDuelRecordInput = {
         coin_flip: 'head',
         duel_result: 'lose',
         go_first: 1,
-        vs_desk: null,
+        vs_desk: '未知卡組',
         points: 100
       };
       queries.createDCRecord(recordData);
@@ -413,7 +413,73 @@ describe('queries.ts', () => {
         DCRecordForTest,
         'vs_desk'
       >;
-      expect(record.vs_desk).toBeNull();
+      expect(record.vs_desk).toBe('未知卡組');
+    });
+  });
+
+  describe('DC Queries by YearMonth', () => {
+    beforeEach(() => {
+      database
+        .prepare(
+          `INSERT INTO dc (coin_flip, duel_result, go_first, vs_desk, points, created_at)
+           VALUES ('head', 'win', 1, 'Tearlaments', 100, '2023-08-01 10:00:00'),
+                  ('tail', 'lose', 0, 'Spright', 50, '2023-08-15 12:00:00'),
+                  ('head', 'win', 1, 'Kashtira', 150, '2023-08-31 23:59:59'),
+                  ('tail', 'lose', 0, '未知卡組', 75, '2023-08-20 14:00:00');`
+        )
+        .run();
+
+      database
+        .prepare(
+          `INSERT INTO dc (coin_flip, duel_result, go_first, vs_desk, points, created_at)
+           VALUES ('tail', 'win', 0, 'Tearlaments', 200, '2023-09-01 00:00:01');`
+        )
+        .run();
+    });
+
+    describe('getDCCoinStats', () => {
+      it('should return correct coin stats for a given year-month', () => {
+        const stats = queries.getDCCoinStats('2023-08');
+        expect(stats).toEqual({ heads: 2, tails: 2, total_matches: 4 });
+      });
+    });
+
+    describe('getDCWinLoseStats', () => {
+      it('should return correct win/lose stats for a given year-month', () => {
+        const stats = queries.getDCWinLoseStats('2023-08');
+        expect(stats).toEqual({
+          totalWins: 2,
+          firstCount: 2,
+          secondCount: 2,
+          firstWins: 2,
+          secondWins: 0,
+          totalMatches: 4
+        });
+      });
+    });
+
+    describe('getDCPointsHistory', () => {
+      it('should return points history for a given year-month', () => {
+        const history = queries.getDCPointsHistory('2023-08');
+        expect(history).toHaveLength(4);
+        expect(history[0].points).toBe(100);
+        expect(history[3].points).toBe(150);
+      });
+    });
+
+    describe('getDCVsDeckStats', () => {
+      it('should return vs deck stats for a given year-month including unknown', () => {
+        const stats = queries.getDCVsDeckStats('2023-08');
+        expect(stats).toHaveLength(4);
+        expect(stats).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ vs_desk: 'Tearlaments', count: 1, percentage: 25 }),
+            expect.objectContaining({ vs_desk: 'Spright', count: 1, percentage: 25 }),
+            expect.objectContaining({ vs_desk: 'Kashtira', count: 1, percentage: 25 }),
+            expect.objectContaining({ vs_desk: '未知卡組', count: 1, percentage: 25 })
+          ])
+        );
+      });
     });
   });
 });

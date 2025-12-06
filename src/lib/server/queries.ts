@@ -5,7 +5,11 @@ import type {
   MDDuelRecordInput,
   BO3MatchRecordInput,
   BO3DashboardLoadData,
-  DCDuelRecordInput
+  DCDuelRecordInput,
+  DCWinLoseStats,
+  DCPoint,
+  DCVsDeckStat,
+  DCEventCount
 } from '$lib/types';
 
 export function getCoinStats(startDate: string, endDate: string): CoinStats {
@@ -107,4 +111,96 @@ export function createDCRecord(data: DCDuelRecordInput): void {
 			 VALUES (@coin_flip, @duel_result, @go_first, @vs_desk, @points, DATETIME('now', '+8 hours'))`
     )
     .run(data);
+}
+
+export function getDCEventByYearMonth() {
+  const result = database
+    .prepare(
+      `
+    SELECT
+      STRFTIME('%Y-%m', d.created_at) AS year_month,
+      COUNT(1) AS qty
+    FROM dc d
+    GROUP BY year_month
+    ORDER BY year_month  DESC;
+    `
+    )
+    .all() as DCEventCount[];
+
+  return result;
+}
+
+export function getDCCoinStats(yearMonth: string): CoinStats {
+  const result = database
+    .prepare(
+      `SELECT
+                IFNULL(SUM(CASE WHEN coin_flip = 'head' THEN 1 ELSE 0 END), 0) as heads,
+                IFNULL(SUM(CASE WHEN coin_flip = 'tail' THEN 1 ELSE 0 END), 0) as tails,
+                COUNT(coin_flip) as total_matches
+            FROM dc
+			WHERE STRFTIME('%Y-%m', created_at) = ?;`
+    )
+    .get(yearMonth) as CoinStats;
+
+  return result;
+}
+
+export function getDCWinLoseStats(yearMonth: string): DCWinLoseStats {
+  const result = database
+    .prepare(
+      `SELECT
+              IFNULL(SUM(CASE WHEN duel_result = 'win' THEN 1 ELSE 0 END), 0) as totalWins,
+              IFNULL(SUM(CASE WHEN go_first = 1 THEN 1 ELSE 0 END), 0) as firstCount,
+              IFNULL(SUM(CASE WHEN go_first = 0 THEN 1 ELSE 0 END), 0) as secondCount,
+              IFNULL(SUM(CASE WHEN duel_result = 'win' AND go_first = 1 THEN 1 ELSE 0 END), 0) as firstWins,
+              IFNULL(SUM(CASE WHEN duel_result = 'win' AND go_first = 0 THEN 1 ELSE 0 END), 0) as secondWins,
+              COUNT(duel_result) as totalMatches
+            FROM dc
+			WHERE STRFTIME('%Y-%m', created_at) = ?;`
+    )
+    .get(yearMonth) as DCWinLoseStats;
+
+  return result;
+}
+
+export function getDCPointsHistory(yearMonth: string): DCPoint[] {
+  return database
+    .prepare(
+      `SELECT points, created_at
+       FROM dc
+       WHERE STRFTIME('%Y-%m', created_at) = ?
+       ORDER BY created_at ASC`
+    )
+    .all(yearMonth) as DCPoint[];
+}
+
+export function getDCVsDeckStats(yearMonth: string): DCVsDeckStat[] {
+  const totalMatchesResult = database
+    .prepare(
+      `SELECT COUNT(*) as count
+       FROM dc
+       WHERE STRFTIME('%Y-%m', created_at) = ?`
+    )
+    .get(yearMonth) as { count: number } | undefined;
+
+  const totalMatches = totalMatchesResult?.count ?? 0;
+
+  if (totalMatches === 0) {
+    return [];
+  }
+
+  const deckCounts = database
+    .prepare(
+      `SELECT vs_desk, COUNT(*) as count
+       FROM dc
+       WHERE STRFTIME('%Y-%m', created_at) = ?
+       GROUP BY vs_desk
+       ORDER BY count DESC`
+    )
+    .all(yearMonth) as { vs_desk: string; count: number }[];
+
+  return deckCounts.map((deck) => ({
+    ...deck,
+    percentage: (deck.count / totalMatches) * 100
+  }));
 }

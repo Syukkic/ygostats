@@ -1,6 +1,74 @@
 import { fail, type Actions } from '@sveltejs/kit';
-import { createDCRecord } from '$lib/server/queries';
+import {
+  createDCRecord,
+  getDCCoinStats,
+  getDCWinLoseStats,
+  getDCPointsHistory,
+  getDCVsDeckStats,
+  getDCEventByYearMonth
+} from '$lib/server/queries';
 import { isCoinFlip, isDuelResult } from '$lib/utils';
+import type { PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async ({ url }) => {
+  const allDCEvents = getDCEventByYearMonth();
+  const selectedEvent =
+    url.searchParams.get('event') || (allDCEvents.length > 0 ? allDCEvents[0].year_month : null);
+
+  if (!selectedEvent) {
+    return {
+      allDCEvents,
+      selectedEvent: null,
+      winLoseStats: {
+        total: 0,
+        totalWinRate: 0,
+        firstCount: 0,
+        secondCount: 0,
+        firstWins: 0,
+        secondWins: 0,
+        firstWinRate: 0,
+        secondWinRate: 0
+      },
+      counts: { total: 0, heads: 0, tails: 0 },
+      pointsHistory: [],
+      vsDeckStats: []
+    };
+  }
+
+  const coinStats = getDCCoinStats(selectedEvent);
+  const winLoseStats = getDCWinLoseStats(selectedEvent);
+  const pointsHistory = getDCPointsHistory(selectedEvent);
+  const vsDeckStats = getDCVsDeckStats(selectedEvent);
+
+  const totalMatches = winLoseStats.totalMatches;
+  const totalWinRate = totalMatches > 0 ? (winLoseStats.totalWins / totalMatches) * 100.0 : 0;
+  const firstWinRate =
+    winLoseStats.firstCount > 0 ? (winLoseStats.firstWins / winLoseStats.firstCount) * 100.0 : 0;
+  const secondWinRate =
+    winLoseStats.secondCount > 0 ? (winLoseStats.secondWins / winLoseStats.secondCount) * 100.0 : 0;
+
+  return {
+    allDCEvents,
+    selectedEvent,
+    winLoseStats: {
+      total: winLoseStats.totalWins,
+      totalWinRate: totalWinRate,
+      firstCount: winLoseStats.firstCount,
+      secondCount: winLoseStats.secondCount,
+      firstWins: winLoseStats.firstWins,
+      secondWins: winLoseStats.secondWins,
+      firstWinRate: firstWinRate,
+      secondWinRate: secondWinRate
+    },
+    counts: {
+      total: totalMatches,
+      heads: coinStats.heads,
+      tails: coinStats.tails
+    },
+    pointsHistory,
+    vsDeckStats
+  };
+};
 
 export const actions: Actions = {
   createRecord: async ({ request }) => {
@@ -43,12 +111,19 @@ export const actions: Actions = {
       });
     }
 
+    let final_vs_desk: string | null = null;
+    if (typeof vs_desk === 'string' && vs_desk.trim() !== '') {
+      final_vs_desk = vs_desk.trim();
+    } else {
+      final_vs_desk = '未知卡組';
+    }
+
     try {
       createDCRecord({
         coin_flip,
         duel_result,
         go_first,
-        vs_desk: typeof vs_desk === 'string' ? vs_desk : null,
+        vs_desk: final_vs_desk,
         points: dc_points
       });
       return { success: true };

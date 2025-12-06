@@ -44,6 +44,24 @@ export interface MDWinLoseStats {
   totalMatches: number;
 }
 
+export interface DCEventCount {
+  year_month: string;
+  qty: number;
+}
+
+export type DCWinLoseStats = MDWinLoseStats;
+
+export interface DCPoint {
+  points: number;
+  created_at: string;
+}
+
+export interface DCVsDeckStat {
+  vs_desk: string;
+  count: number;
+  percentage: number;
+}
+
 // --- SvelteKit Page Load Data Types ---
 
 export interface MDDashboardLoadData {
