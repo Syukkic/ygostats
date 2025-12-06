@@ -2,11 +2,62 @@
   import { formatRate } from '$lib/utils';
   import { enhance } from '$app/forms';
   import type { PageData, ActionData } from './$types';
+  import { onMount } from 'svelte';
+  import {
+    CategoryScale,
+    Chart,
+    Legend,
+    LinearScale,
+    LineController,
+    LineElement,
+    PointElement,
+    Title,
+    Tooltip
+  } from 'chart.js';
 
   let { data, form }: { data: PageData; form?: ActionData } = $props();
 
   let isSubmitting = $state(false);
   let successMessage = $state<string | null>(null);
+  let canvasElement = $state<HTMLCanvasElement | undefined>(undefined);
+
+  const createDateArray = data.pointsHistory.map((p) => p.created_at);
+  const dcPointArray = data.pointsHistory.map((p) => p.points);
+
+  onMount(() => {
+    Chart.register(
+      LineController,
+      LineElement,
+      PointElement,
+      CategoryScale,
+      LinearScale,
+      Title,
+      Tooltip,
+      Legend
+    );
+    const ctx = canvasElement!.getContext('2d');
+    if (!ctx) {
+      console.error('Canvas context is null. Chart cannot be initialized.');
+      return;
+    }
+    const data = {
+      labels: createDateArray,
+      datasets: [
+        {
+          label: 'DC分數',
+          data: dcPointArray,
+          fill: false,
+          borderColor: '#007bff',
+          backgroundColor: '#007bff'
+        }
+      ]
+    };
+
+    new Chart(ctx, {
+      type: 'line',
+      data: data
+    });
+  });
 
   function resetForm(formElement: HTMLFormElement) {
     formElement.reset();
@@ -242,7 +293,9 @@
         </table>
 
         <h2 style="margin-top: var(--section-gap);">分數走勢</h2>
-        <div class="chart-container">Todo</div>
+        <div class="chart-container">
+          <canvas bind:this={canvasElement}></canvas>
+        </div>
       {:else if data.selectedEvent}
         <p style="margin-top: var(--section-gap);">該月份沒有數據。</p>
       {:else}

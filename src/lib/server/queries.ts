@@ -166,7 +166,7 @@ export function getDCWinLoseStats(yearMonth: string): DCWinLoseStats {
 export function getDCPointsHistory(yearMonth: string): DCPoint[] {
   return database
     .prepare(
-      `SELECT points, created_at
+      `SELECT points, STRFTIME('%m-%d %H:%M', created_at) AS created_at
        FROM dc
        WHERE STRFTIME('%Y-%m', created_at) = ?
        ORDER BY created_at ASC`
