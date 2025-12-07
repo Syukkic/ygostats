@@ -1,21 +1,29 @@
-## 安裝
+## Prerequirement
+
+Install [NodeJS](https://nodejs.org/en/download)
+
+
+## Installation
 
 ```bash
 pnpm install
-```
-
-如果遇到`better-sqlite3`問題，嘗試執行以下命令來修復它：
-
-```bash
 npx node-gyp rebuild --directory=node_modules/better-sqlite3
 ```
 
-## 運行
+
+## Build
 
 ```bash
-NODE_ENV=production node build/index.js
+pnpm build
 ```
 
-## 截圖
+## Execution
+
+```bash
+NODE_ENV=production PORT=12345 HOST="127.0.0.1" ORIGIN="http://127.0.0.1:12345" node build/index.js
+```
+
+
+## Screenshot
 
 ![screenshot](./assets/demo.png)
