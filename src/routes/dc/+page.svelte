@@ -22,8 +22,8 @@
   let canvasElement = $state<HTMLCanvasElement | undefined>(undefined);
   let chartInstance = $state<Chart | undefined>(undefined);
 
-  const createDateArray = data.pointsHistory.map((p) => p.created_at);
-  const dcPointArray = data.pointsHistory.map((p) => p.points);
+  const createDateArray = $derived(data.pointsHistory.map((p) => p.created_at));
+  const dcPointArray = $derived(data.pointsHistory.map((p) => p.points));
 
   onMount(() => {
     Chart.register(
@@ -61,9 +61,6 @@
 
   $effect(() => {
     if (!chartInstance) return;
-
-    const createDateArray = data.pointsHistory.map((p) => p.created_at);
-    const dcPointArray = data.pointsHistory.map((p) => p.points);
 
     chartInstance.data.labels = createDateArray;
     chartInstance.data.datasets[0].data = dcPointArray;
