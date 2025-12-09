@@ -20,6 +20,7 @@
   let isSubmitting = $state(false);
   let successMessage = $state<string | null>(null);
   let canvasElement = $state<HTMLCanvasElement | undefined>(undefined);
+  let chartInstance = $state<Chart | undefined>(undefined);
 
   const createDateArray = data.pointsHistory.map((p) => p.created_at);
   const dcPointArray = data.pointsHistory.map((p) => p.points);
@@ -40,23 +41,33 @@
       console.error('Canvas context is null. Chart cannot be initialized.');
       return;
     }
-    const data = {
-      labels: createDateArray,
-      datasets: [
-        {
-          label: 'DC分數',
-          data: dcPointArray,
-          fill: false,
-          borderColor: '#007bff',
-          backgroundColor: '#007bff'
-        }
-      ]
-    };
 
-    new Chart(ctx, {
+    chartInstance = new Chart(ctx, {
       type: 'line',
-      data: data
+      data: {
+        labels: createDateArray,
+        datasets: [
+          {
+            label: 'DC分數',
+            data: dcPointArray,
+            fill: false,
+            borderColor: '#007bff',
+            backgroundColor: '#007bff'
+          }
+        ]
+      }
     });
+  });
+
+  $effect(() => {
+    if (!chartInstance) return;
+
+    const createDateArray = data.pointsHistory.map((p) => p.created_at);
+    const dcPointArray = data.pointsHistory.map((p) => p.points);
+
+    chartInstance.data.labels = createDateArray;
+    chartInstance.data.datasets[0].data = dcPointArray;
+    chartInstance.update();
   });
 
   function resetForm(formElement: HTMLFormElement) {
