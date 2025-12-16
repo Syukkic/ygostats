@@ -82,6 +82,8 @@ export interface MDDashboardLoadData {
     total: number;
     heads: number;
     tails: number;
+    headCoinRate: number;
+    tailCoinRate: number;
   };
 }
 

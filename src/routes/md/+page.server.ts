@@ -22,6 +22,11 @@ export const load: PageServerLoad = async ({ url }) => {
   const secondWinRate =
     winLoseStats.secondCount > 0 ? (winLoseStats.secondWins / winLoseStats.secondCount) * 100.0 : 0;
 
+  const headCoinRate =
+    coinStats.total_matches > 0 ? (coinStats.heads / coinStats.total_matches) * 100.0 : 0;
+  const tailCoinRate =
+    coinStats.total_matches > 0 ? (coinStats.tails / coinStats.total_matches) * 100.0 : 0;
+
   return {
     startDate,
     endDate,
@@ -38,7 +43,9 @@ export const load: PageServerLoad = async ({ url }) => {
     counts: {
       total: coinStats.total_matches,
       heads: coinStats.heads,
-      tails: coinStats.tails
+      tails: coinStats.tails,
+      headCoinRate: headCoinRate,
+      tailCoinRate: tailCoinRate
     }
   };
 };

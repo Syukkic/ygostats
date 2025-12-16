@@ -29,7 +29,7 @@ export const load: PageServerLoad = async ({ url }) => {
         firstWinRate: 0,
         secondWinRate: 0
       },
-      counts: { total: 0, heads: 0, tails: 0 },
+      counts: { total: 0, heads: 0, tails: 0, headCoinRate: 0, tailCoinRate: 0 },
       pointsHistory: [],
       vsDeckStats: []
     };
@@ -47,6 +47,11 @@ export const load: PageServerLoad = async ({ url }) => {
   const secondWinRate =
     winLoseStats.secondCount > 0 ? (winLoseStats.secondWins / winLoseStats.secondCount) * 100.0 : 0;
 
+  const headCoinRate =
+    coinStats.total_matches > 0 ? (coinStats.heads / coinStats.total_matches) * 100.0 : 0;
+  const tailCoinRate =
+    coinStats.total_matches > 0 ? (coinStats.tails / coinStats.total_matches) * 100.0 : 0;
+
   return {
     allDCEvents,
     selectedEvent,
@@ -63,7 +68,9 @@ export const load: PageServerLoad = async ({ url }) => {
     counts: {
       total: totalMatches,
       heads: coinStats.heads,
-      tails: coinStats.tails
+      tails: coinStats.tails,
+      headCoinRate: headCoinRate,
+      tailCoinRate: tailCoinRate
     },
     pointsHistory,
     vsDeckStats

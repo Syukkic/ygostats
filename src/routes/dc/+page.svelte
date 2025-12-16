@@ -265,16 +265,19 @@
             <tr>
               <th>結果</th>
               <th>次數</th>
+              <th>佔比</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>正面</td>
               <td>{data.counts.heads}</td>
+              <td>{formatRate(data.counts.headCoinRate)}</td>
             </tr>
             <tr>
               <td>反面</td>
               <td>{data.counts.tails}</td>
+              <td>{formatRate(data.counts.tailCoinRate)}</td>
             </tr>
           </tbody>
         </table>
