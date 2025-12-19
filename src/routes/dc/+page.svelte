@@ -25,6 +25,12 @@
   const createDateArray = $derived(data.pointsHistory.map((p) => p.created_at));
   const dcPointArray = $derived(data.pointsHistory.map((p) => p.points));
 
+  const unknownDecks = data.vsDeckStats.filter((d) => d.vs_desk === '未知卡組');
+  const otherDecks = data.vsDeckStats
+    .filter((d) => d.vs_desk !== '未知卡組')
+    .sort((a, b) => b.count - a.count);
+  const sortedDesks = [...otherDecks, ...unknownDecks];
+
   onMount(() => {
     Chart.register(
       LineController,
@@ -282,6 +288,11 @@
           </tbody>
         </table>
 
+        <h2 style="margin-top: var(--section-gap);">分數走勢</h2>
+        <div class="chart-container">
+          <canvas bind:this={canvasElement}></canvas>
+        </div>
+
         <h2 style="margin-top: var(--section-gap);">對手卡組分佈</h2>
         <table>
           <caption class="visually-hidden">對手卡組分佈統計</caption>
@@ -293,7 +304,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each data.vsDeckStats as deck (deck.vs_desk)}
+            {#each sortedDesks as deck (deck.vs_desk)}
               <tr>
                 <td>{deck.vs_desk}</td>
                 <td>{deck.count}</td>
@@ -302,11 +313,6 @@
             {/each}
           </tbody>
         </table>
-
-        <h2 style="margin-top: var(--section-gap);">分數走勢</h2>
-        <div class="chart-container">
-          <canvas bind:this={canvasElement}></canvas>
-        </div>
       {:else if data.selectedEvent}
         <p style="margin-top: var(--section-gap);">該月份沒有數據。</p>
       {:else}
