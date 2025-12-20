@@ -25,11 +25,11 @@
   const createDateArray = $derived(data.pointsHistory.map((p) => p.created_at));
   const dcPointArray = $derived(data.pointsHistory.map((p) => p.points));
 
-  const unknownDecks = data.vsDeckStats.filter((d) => d.vs_desk === '未知卡組');
-  const otherDecks = data.vsDeckStats
-    .filter((d) => d.vs_desk !== '未知卡組')
-    .sort((a, b) => b.count - a.count);
-  const sortedDesks = [...otherDecks, ...unknownDecks];
+  const unknownDecks = $derived(data.vsDeckStats.filter((d) => d.vs_desk === '未知卡組'));
+  const otherDecks = $derived(
+    data.vsDeckStats.filter((d) => d.vs_desk !== '未知卡組').sort((a, b) => b.count - a.count)
+  );
+  const sortedDesks = $derived([...otherDecks, ...unknownDecks]);
 
   onMount(() => {
     Chart.register(
@@ -304,7 +304,7 @@
             </tr>
           </thead>
           <tbody>
-            {#each sortedDesks as deck (deck.vs_desk)}
+            {#each sortedDesks as deck}
               <tr>
                 <td>{deck.vs_desk}</td>
                 <td>{deck.count}</td>
