@@ -25,8 +25,7 @@
     !!vsDesk && isCompleteG1G2 && (score.win === 2 || score.lose === 2 || (needG3 && isG3Filled))
   );
 
-  function resetForm(formElement: HTMLFormElement) {
-    formElement.reset();
+  function resetForm() {
     g1Result = '';
     g2Result = '';
     g3Result = '';
@@ -47,9 +46,9 @@
         isSubmitting = true;
         successMessage = null;
         return async ({ result, update }) => {
+          await update({ reset: false });
           if (result.type === 'success') {
-            resetForm(document.querySelector('.add-record-form') as HTMLFormElement);
-            await update();
+            resetForm();
           } else if (result.type === 'error') {
             console.error('Form submission error:', result.error);
           }

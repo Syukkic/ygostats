@@ -7,14 +7,6 @@
 
   let isSubmitting = $state(false);
   let successMessage = $state<string | null>(null);
-
-  function resetForm(formElement: HTMLFormElement) {
-    formElement.reset();
-    const radioButtons = formElement.querySelectorAll<HTMLInputElement>('input[type="radio"]');
-    radioButtons.forEach((radio) => (radio.checked = false));
-    successMessage = '紀錄已成功保存！';
-    setTimeout(() => (successMessage = null), 3000);
-  }
 </script>
 
 <div class="dashboard-grid">
@@ -27,9 +19,10 @@
         isSubmitting = true;
         successMessage = null;
         return async ({ result, update }) => {
+          await update();
           if (result.type === 'success') {
-            resetForm(document.querySelector('.add-record-form') as HTMLFormElement);
-            await update();
+            successMessage = '紀錄已成功保存！';
+            setTimeout(() => (successMessage = null), 3000);
           } else if (result.type === 'error') {
             console.error('Form submission error:', result.error);
           }
